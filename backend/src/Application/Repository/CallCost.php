@@ -2,7 +2,9 @@
 
 namespace SRC\Application\Repository;
 
-class CallCost
+use SRC\Domain\CallCost\GetCallDataValue;
+
+class CallCost implements GetCallDataValue
 {
     private \PDO $connection;
 
@@ -11,35 +13,36 @@ class CallCost
         $this->connection = $connection->getConnection();
     }
 
-    public function findByAreaCodes(int $from, int $to)
+    public function getRateByOriginAndDestinyArea(int $from, int $to): float
+    {
+
+    }
+
+    public function getPlanDataByPlanId(int $planId): array
     {
         $stmt = $this->connection->prepare("SELECT
-                                            from
+                                            `name`,
+                                            duration
                                         FROM
-                                            call_cost C
-                                            LEFT JOIN contact CT ON CT.client_id = C.id AND CT.deleted_at IS NULL
+                                            service_plan
                                         WHERE
-                                            C.deleted_at IS NULL AND
-                                            C.id = ?");
-        $stmt->bindValue(1, $id);
+                                            id = ?");
+        $stmt->bindValue(1, $planId);
         $stmt->execute();
-        $data = [];
 
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $key => $row) {
-            $data['name'] = $row['name'];
-            $data['identifier'] = $row['identifier'];
-            $data['id'] = $row['id'];
-            $data['typePerson'] = $row['typePerson'];
-            $data['contacts'] = [];
-            if (!empty($row['type'])) {
-                $data['contacts'][] = [
-                    'type' => $row['type'],
-                    'id' => $row['contactId'],
-                    'contact' => $row['contact'],
-                ];
-            }
-        }
+        return $stmt->fetch();
+    }
 
-        return $data;
+    public function getAreaCodeById(int $areaCode): string
+    {
+        $stmt = $this->connection->prepare("SELECT
+                                            code
+                                        FROM
+                                            area_code
+                                        WHERE
+                                            id = ?");
+        $stmt->bindValue(1, $areaCode);
+        $stmt->execute();
+        return $stmt->fetch()['code'];
     }
 }

@@ -2,38 +2,37 @@
 
 namespace SRC\Application\Controller;
 
-use PlugRoute\Http\Request;
 use SRC\Application\Boundery\InputCallData;
+use SRC\Application\Repository\CallCost;
+use SRC\Application\Repository\Connection;
 use SRC\Domain\CallCost\GetCallDataValue;
 use SRC\Domain\CallCost\ValidateInputData;
 
 class CalculateCallCost
 {
-    private ValidateInputData $validator;
-
-    private GetCallDataValue $repository;
+    private Connection $connection;
 
     public function __construct(
-        ValidateInputData $validateInputData,
-        GetCallDataValue $getCallDataValue
+        Connection $connection
     )
     {
-        $this->validator = $validateInputData;
-        $this->repository = $getCallDataValue;
+        $this->connection = $connection;
     }
 
-    public function calculate(Request $request)
+    public function calculate($from, $to, $plan, $duration)
     {
         $inputData = new InputCallData(
-            $request->input('from'),
-            $request->input('to'),
-            $request->input('plan'),
-            $request->input('duration')
+            $from,
+            $to,
+            $plan,
+            $duration
         );
 
-        $data = (new \SRC\Domain\CallCost\CalculateCallCost(
-            $this->validator,
-            $this->repository
-        ))->calculate($inputData);
+        $repository = new CallCost($this->connection);
+
+        $data = (new \SRC\Domain\CallCost\CalculateCallCost($repository))
+            ->calculate($inputData);
+
+        echo json_encode($data);
     }
 }
