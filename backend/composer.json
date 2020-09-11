@@ -4,7 +4,8 @@
   },
   "autoload": {
     "psr-4": {
-      "SRC\\": "src/"
+      "SRC\\": "src/",
+      "SRC\\Test\\": "tests"
     }
   },
   "require-dev": {
