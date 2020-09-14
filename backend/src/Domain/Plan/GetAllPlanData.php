@@ -2,12 +2,12 @@
 
 namespace SRC\Domain\Plan;
 
-class GetAllPlan
+class GetAllPlanData
 {
     private GetPlan $repository;
 
     /**
-     * GetAllPlan constructor.
+     * GetAllPlanData constructor.
      * @param GetPlan $repository
      */
     public function __construct(GetPlan $repository)

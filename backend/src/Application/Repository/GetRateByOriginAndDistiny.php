@@ -14,7 +14,7 @@ class GetRateByOriginAndDistiny implements GetRateByOriginAndDestiny
         $this->connection = $connection->getConnection();
     }
 
-    public function find(int $origin, int $destiny): array
+    public function find(int $origin, int $destiny): float
     {
         $stmt = $this->connection->prepare("SELECT
                                             rate

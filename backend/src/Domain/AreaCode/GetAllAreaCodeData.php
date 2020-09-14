@@ -2,7 +2,7 @@
 
 namespace SRC\Domain\AreaCode;
 
-class GetAllAreaCode
+class GetAllAreaCodeData
 {
     private GetAllAreaCode $repository;
 

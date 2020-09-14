@@ -7,7 +7,7 @@ class GetPlanDataById
     private GetPlanById $repository;
 
     /**
-     * GetAllPlan constructor.
+     * GetAllPlanData constructor.
      * @param GetPlanById $repository
      */
     public function __construct(GetPlanById $repository)
@@ -15,7 +15,7 @@ class GetPlanDataById
         $this->repository = $repository;
     }
 
-    public function findAll(int $id)
+    public function find(int $id)
     {
         return $this->repository->find($id);
     }

@@ -2,7 +2,7 @@
 
 namespace SRC\Application\Repository;
 
-class GetPlanById implements \SRC\Domain\Plan\GetPlanById
+class GetAreaCodeById implements \SRC\Domain\AreaCode\GetAreaCodeById
 {
     private \PDO $connection;
 
@@ -11,18 +11,16 @@ class GetPlanById implements \SRC\Domain\Plan\GetPlanById
         $this->connection = $connection->getConnection();
     }
 
-    public function find(int $planId): array
+    public function find(int $areaCode): string
     {
         $stmt = $this->connection->prepare("SELECT
-                                            `name`,
-                                            duration
+                                            code
                                         FROM
-                                            service_plan
+                                            area_code
                                         WHERE
                                             id = ?");
-        $stmt->bindValue(1, $planId);
+        $stmt->bindValue(1, $areaCode);
         $stmt->execute();
-
-        return $stmt->fetch();
+        return $stmt->fetch()['code'];
     }
 }

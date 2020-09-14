@@ -4,46 +4,117 @@ namespace SRC\Domain\CallCost;
 
 class CalculateCallCost
 {
-    private GetCallDataValue $repository;
+    private GetAreaCodeDataById $areaCodeService;
+
+    private GetPlanDataById $planService;
+
+    private GetRateByOriginAndDestiny $cost;
+    
+    private array $response;
 
     public function __construct(
-        GetCallDataValue $getCallDataValue
+        GetAreaCodeDataById $areaCodeDataById,
+        GetPlanDataById $planById,
+        GetRateByOriginAndDestiny $cost
     )
     {
-        $this->repository = $getCallDataValue;
+        $this->areaCodeService = $areaCodeDataById;
+        $this->planService = $planById;
+        $this->cost = $cost;
     }
 
+    /**
+     * Calculate call cost with plan and without plan.
+     *
+     * @param InputCallData $inputCallData
+     *
+     * @see mountDefaultResponse
+     * @see calculateCallValuesIfHasRate
+     *
+     * @return array
+     */
     public function calculate(InputCallData $inputCallData)
     {
-        $from = $this->repository->getAreaCodeById($inputCallData->getFrom());
-        $to = $this->repository->getAreaCodeById($inputCallData->getTo());
+        $from   = $this->areaCodeService->findCodeById($inputCallData->getFrom());
+        $to     = $this->areaCodeService->findCodeById($inputCallData->getTo());
+        $plan   = $this->planService->find($inputCallData->getPlan());
 
-        $cost = $this->repository->getRateByOriginAndDestinyArea(
-            $inputCallData->getFrom(), $inputCallData->getTo()
+        $costValue = $this->cost->find(
+            $inputCallData->getFrom(),
+            $inputCallData->getTo()
         );
 
-        $plan = $this->repository->getPlanDataByPlanId($inputCallData->getPlan());
-        $response = [
+        $this->mountDefaultResponse($from, $to, $plan['name'], $inputCallData->getDuration());
+
+        $this->calculateCallValuesIfHasRate(
+            $costValue,
+            $plan['duration'],
+            $inputCallData->getDuration()
+        );
+
+        return $this->response;
+    }
+
+    private function mountDefaultResponse($from, $to, $planName, $duration)
+    {
+        $this->response = [
             'from' => $from,
             'to'   => $to,
-            'plan' => $plan['name'],
+            'duration' => $duration,
+            'plan' => $planName,
             'withPlan' => '-',
             'withoutPlan' => '-'
         ];
+    }
 
-        if ($cost) {
+    private function calculateCallValuesIfHasRate($rate, $planDuration, $duration)
+    {
+        if ($rate) {
             $withPlan = 0;
-            $withoutPlan = $cost * $inputCallData->getDuration();
+            $withoutPlan = $rate * $duration;
 
-            if ($plan['duration'] < $inputCallData->getDuration()) {
-                $withPlan = $inputCallData->getDuration() - $plan['duration'];
-                $withPlan = $withPlan * ($cost + ($cost / 10));
+            if ($this->checkIfHasTimeOut($duration, $planDuration)) {
+                $withPlan = $this->calculatePlanCall(
+                    $duration,
+                    $planDuration,
+                    $rate
+                );
             }
 
-            $response['withPlan'] = $withPlan;
-            $response['withoutPlan'] = $withoutPlan;
+            $this->updatePlanValues($withPlan, $withoutPlan);
         }
+    }
 
-        return $response;
+    /**
+     * Check if call duration is bigger than plan duration.
+     *
+     * @param $duration
+     * @param $planDuration
+     * @return bool
+     */
+    private function checkIfHasTimeOut($duration, $planDuration)
+    {
+        return $planDuration < $duration;
+    }
+
+    /**
+     * Calculate call cost.
+     *
+     * @param $callDuration
+     * @param $planDuration
+     * @param $cost
+     * @return float|int
+     */
+    private function calculatePlanCall($callDuration, $planDuration, $cost)
+    {
+        $timeOut = $callDuration - $planDuration;
+
+        return $timeOut * ($cost + ($cost / 10));
+    }
+
+    private function updatePlanValues($planValue, $withoutPlanValue)
+    {
+        $this->response['withPlan'] = $planValue;
+        $this->response['withoutPlan'] = $withoutPlanValue;
     }
 }

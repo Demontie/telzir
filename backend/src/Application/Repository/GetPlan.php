@@ -18,7 +18,7 @@ class GetPlan implements \SRC\Domain\Plan\GetPlan
                                             id,
                                             `name`
                                         FROM
-                                            sevice_plan
+                                            service_plan
                                         WHERE
                                             deleted_at IS NULL");
 
