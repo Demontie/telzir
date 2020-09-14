@@ -10,7 +10,7 @@ axios.interceptors.response.use(function (response) {
   return axiosResponse
 })
 
-const baseUrl = 'http://localhost:8080/clients'
+const baseUrl = 'http://YOUR_IP:8081/'
 
 const get = (url = '', config = {}) => axios.get(`${baseUrl}${url}`, config)
 
