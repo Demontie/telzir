@@ -12,7 +12,11 @@ class CallCost extends TestCase
 
     protected function setUp(): void
     {
-        $this->domain = new CalculateCallCost(new Repository());
+        $this->domain = new CalculateCallCost(
+            new AreaCodeRepository(),
+            new PlanRepository(),
+            new GetRateRepository()
+        );
     }
 
     public function testCalculatePlan30()
@@ -22,9 +26,10 @@ class CallCost extends TestCase
         $expected = [
             'from' => '011',
             'to'   => '016',
+            'duration' => 20,
             'plan' => 'FaleMais 30',
-            'withPlan' => '0',
-            'withoutPlan' => '38'
+            'withPlan' => 0,
+            'withoutPlan' => 38
         ];
         $this->assertEquals($expected, $current);
     }
@@ -36,6 +41,7 @@ class CallCost extends TestCase
         $expected = [
             'from' => '011',
             'to'   => '017',
+            'duration' => 80,
             'plan' => 'FaleMais 60',
             'withPlan' => 37.40,
             'withoutPlan' => 136
@@ -50,6 +56,7 @@ class CallCost extends TestCase
         $expected = [
             'from' => '018',
             'to'   => '011',
+            'duration' => 200,
             'plan' => 'FaleMais 120',
             'withPlan' => 167.20,
             'withoutPlan' => 380
@@ -64,6 +71,7 @@ class CallCost extends TestCase
         $expected = [
             'from' => '018',
             'to'   => '017',
+            'duration' => 100,
             'plan' => 'FaleMais 30',
             'withPlan' => '-',
             'withoutPlan' => '-'
