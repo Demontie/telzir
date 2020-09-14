@@ -10,7 +10,7 @@ $route->options('/{anything}', function () {
     return '';
 });
 
-$route->post('/', 'SRC\Infrastructure\InputHandler\CallCostInput@calculate');
+$route->post('/calls-values', 'SRC\Infrastructure\InputHandler\CallCostInput@calculate');
 
 $route->get('/plans', 'SRC\Infrastructure\InputHandler\Plan@findAll');
 
